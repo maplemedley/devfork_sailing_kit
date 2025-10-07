@@ -37,16 +37,16 @@ minetest.register_craftitem("sailing_kit:cloth", {
 minetest.register_craft({
 	output = "sailing_kit:cloth",
 	recipe = {
-		{"farming:string","farming:string","farming:string"},
-		{"farming:string","farming:string","farming:string"},
-		{"farming:string","farming:string","farming:string"},
+		{xcompat.materials.string,xcompat.materials.string,xcompat.materials.string},
+		{xcompat.materials.string,xcompat.materials.string,xcompat.materials.string},
+		{xcompat.materials.string,xcompat.materials.string,xcompat.materials.string},
 	},
 })
 
 minetest.register_craft({
 	output = "sailing_kit:boat",
 	recipe = {
-		{"farming:string","sailing_kit:cloth","farming:string"},
+		{xcompat.materials.string,"sailing_kit:cloth",xcompat.materials.string},
 		{"group:wood", "sailing_kit:cloth","group:wood"},
 		{"group:wood", "group:wood", "group:wood"},
 	},

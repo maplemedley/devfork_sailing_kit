@@ -1,5 +1,14 @@
 --local abr = minetest.get_mapgen_setting('active_block_range')
 
+local player_compat = nil
+local player_compat_animate = true
+if core.get_modpath("default") then
+	player_compat = player_api
+elseif core.get_modpath("mcl_core") then
+	player_compat = mcl_player
+	player_compat_animate = false
+end
+
 local pi = math.pi
 local random = math.random
 local min = math.min
@@ -74,10 +83,10 @@ local destroy=function(self)
 	self.object:remove()
 	pos.y=pos.y+2
 	for i=1,3 do
-		minetest.add_item({x=pos.x+random()-0.5,y=pos.y,z=pos.z+random()-0.5},'default:wood')
+		minetest.add_item({x=pos.x+random()-0.5,y=pos.y,z=pos.z+random()-0.5},xcompat.materials.apple_planks)
 	end	
 	for i=1,9 do
-		minetest.add_item({x=pos.x+random()-0.5,y=pos.y,z=pos.z+random()-0.5},'farming:string')
+		minetest.add_item({x=pos.x+random()-0.5,y=pos.y,z=pos.z+random()-0.5},xcompat.materials.string)
 	end	
 end
 
@@ -241,11 +250,13 @@ local paint_sail=function(self,puncher,ttime, toolcaps, dir, damage)
 		local itmstck=puncher:get_wielded_item()
 		if itmstck then
 			local name=itmstck:get_name()
-			local _,indx = name:find('dye:')
+			local _,indx = name:find('.*dyes?:')  -- Find any dye-item pattern
+			-- Supported dye prefixes: dyes, mcl_dyes, mcl_dye, fl_dyes.
 			if indx then
+				string.gsub(name, "_dye$", "")  -- Remove "_dye" from end of item name if found (for farlands game)
 				local color = name:sub(indx+1)
 				local colstr = colors[color]
--- minetest.chat_send_all(color ..' '.. dump(colstr))
+				-- minetest.chat_send_all(color ..' '.. dump(colstr))
 				if colstr then
 					self.sail:set_properties({textures={"sail.png^[multiply:".. colstr}})
 					mobkit.remember(self,'sailcolor',colstr)
@@ -276,7 +287,7 @@ minetest.register_entity('sailing_kit:boat',{
 	makes_footstep_sound = true,
 	visual = "mesh",
 	mesh = "sailboat_hull.obj",
-	textures = {"default_wood.png"},
+	textures = {xcompat.textures.wood.apple.planks},
 	
 	water_drag = 0,		-- handled by object's own logic.
 	buoyancy = 0.45,
@@ -289,16 +300,17 @@ on_rightclick=function(self, clicker)
 --		clicker:set_attach(self.object,'',{x=20,y=3,z=0},{x=0,y=0,z=0})
 		clicker:set_attach(self.object,'',{x=-3,y=2,z=-21},{x=0,y=0,z=0})
 		clicker:set_eye_offset({x=0,y=0,z=-20},{x=0,y=0,z=-5})
-		player_api.player_attached[clicker:get_player_name()] = true
+		if player_compat then player_compat.player_attached[clicker:get_player_name()] = true end
 		minetest.after(0.2, function()
-			player_api.set_animation(clicker, "sit" , 30)
+
+			if player_compat and player_compat_animate then player_compat.set_animation(clicker, "sit" , 30) end
 		end)
 		self.driver = clicker:get_player_name()
 	else
 		clicker:set_detach()
-		player_api.player_attached[clicker:get_player_name()] = false
+		if player_compat then player_compat.player_attached[clicker:get_player_name()] = false end
 		clicker:set_eye_offset({x=0,y=0,z=0},{x=0,y=0,z=0})
-		player_api.set_animation(clicker, "stand" , 30)
+		if player_compat and player_compat_animate then player_compat.set_animation(clicker, "stand" , 30) end
 		self.driver = nil
 	end
 end,
@@ -323,7 +335,7 @@ initial_properties = {
 	pointable=false,
 	visual = "mesh",
 	mesh = "mast01.obj",
-	textures = {"default_junglewood.png"},
+	textures = {xcompat.textures.wood.jungle.planks},
 	},
 
 	
@@ -396,7 +408,7 @@ initial_properties = {
 	pointable=false,
 	visual = "mesh",
 	mesh = "rudder.obj",
-	textures = {"default_junglewood.png"},
+	textures = {xcompat.textures.wood.jungle.planks},
 	},
 	
 on_activate = function(self,std)
@@ -423,3 +435,4 @@ minetest.register_on_chat_message(
 		end
 	end
 )
+
