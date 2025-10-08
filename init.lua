@@ -1,14 +1,5 @@
 --local abr = minetest.get_mapgen_setting('active_block_range')
 
-local player_compat = nil
-local player_compat_animate = true
-if core.get_modpath("default") then
-	player_compat = player_api
-elseif core.get_modpath("mcl_core") then
-	player_compat = mcl_player
-	player_compat_animate = false
-end
-
 local pi = math.pi
 local random = math.random
 local min = math.min
@@ -300,17 +291,17 @@ on_rightclick=function(self, clicker)
 --		clicker:set_attach(self.object,'',{x=20,y=3,z=0},{x=0,y=0,z=0})
 		clicker:set_attach(self.object,'',{x=-3,y=2,z=-21},{x=0,y=0,z=0})
 		clicker:set_eye_offset({x=0,y=0,z=-20},{x=0,y=0,z=-5})
-		if player_compat then player_compat.player_attached[clicker:get_player_name()] = true end
+		if xcompat.player then xcompat.player.player_attached[clicker:get_player_name()] = true end
 		minetest.after(0.2, function()
 
-			if player_compat and player_compat_animate then player_compat.set_animation(clicker, "sit" , 30) end
+			if xcompat.player then xcompat.player.set_animation(clicker, "sit" , 30) end
 		end)
 		self.driver = clicker:get_player_name()
 	else
 		clicker:set_detach()
-		if player_compat then player_compat.player_attached[clicker:get_player_name()] = false end
+		if xcompat.player then xcompat.player.player_attached[clicker:get_player_name()] = false end
 		clicker:set_eye_offset({x=0,y=0,z=0},{x=0,y=0,z=0})
-		if player_compat and player_compat_animate then player_compat.set_animation(clicker, "stand" , 30) end
+		if xcompat.player then xcompat.player.set_animation(clicker, "stand" , 30) end
 		self.driver = nil
 	end
 end,
